@@ -11,6 +11,73 @@ export default function SellNFT () {
     const [message, updateMessage] = useState('');
     const location = useLocation();
 
+
+// My Helper Functions
+    async function OnChangeFile(e) {
+        var file = e.target.files[0];
+
+        try {
+            const response = await uploadFileToIPFS(file);
+            if(response.success === true){
+                console.log("Uploaded inage to Pinata:", response.pinataURL)
+                setFileURL(response.pinataURL);
+            }
+        } catch(e) {
+            console.log("Error during file upload", e)
+        }
+    }
+
+    async function uploadMetadataToIPFS() {
+        const {name, description, price} = formParams;
+
+        if(!name || !description || ~price || !fileURL )
+            return;
+
+        const nftJSON = {
+            name, description, price, image: fileURL
+        };
+
+        try {
+            const response = await uploadJSONToIPFS(nftJSON);
+            if(response.success === true) {
+                console.log("Uploaded JSON to Pinata: ", response);
+                return response.pinataURL;
+            }
+        } catch(e) {
+            console.log("error uploading JSON metadata: ", e);
+        }
+    }
+
+// This function interacts with the smart contract
+    async function listNFT(e) {
+        e.preventDefault();
+        
+        try {
+            const metadataURL = await uploadMetadataToIPFS();
+            const provider = new ethers.providers.Web3Provider(window.ethereum); //this is our gateway to communicating with the Goerli network.
+            const signer = provider.getSigner();
+
+            updateMessage("Please wait ... uploading (upto 5 mins)");
+
+            let contract = new ethers.Contract(Marketplace.address, Marketplace.abi, signer);
+
+            const price = ethers.utils.parseUnits(formParams.price, 'ether');
+            let listingPrice = await contract.getListPrice();
+            listingPrice = listingPrice.toString();
+
+            let transaction = await contract.createToken(metadataURL, price, {value: listingPrice});
+            await transaction.wait();
+
+            alert("Successfully listed your NFT!");
+            updateMessage("");
+            updateFormParams({name:'', dscription:'', price:''});
+            window.location.replace("/");
+
+        } catch(e) {
+            alert("Upload error: "+e);
+        }
+    }
+
     return (
         <div className="">
         <Navbar></Navbar>
@@ -31,11 +98,11 @@ export default function SellNFT () {
                 </div>
                 <div>
                     <label className="block text-purple-500 text-sm font-bold mb-2" htmlFor="image">Upload Image</label>
-                    <input type={"file"} onChange={""}></input>
+                    <input type={"file"} onChange={OnChangeFile}></input>
                 </div>
                 <br></br>
                 <div className="text-green text-center">{message}</div>
-                <button onClick={""} className="font-bold mt-10 w-full bg-purple-500 text-white rounded p-2 shadow-lg">
+                <button onClick={listNFT} className="font-bold mt-10 w-full bg-purple-500 text-white rounded p-2 shadow-lg">
                     List NFT
                 </button>
             </form>

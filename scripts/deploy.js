@@ -1,15 +1,17 @@
-const { ethers } = require("hardhat");
+const { ethers } = require("hardhat"); // imports ether library from hardhat
 const hre = require("hardhat");
 const fs = require("fs");
 
 async function main() {
-  const [deployer] = await ethers.getSigners();
-  const balance = await deployer.getBalance();
+  const [deployer] = await ethers.getSigners(); //gives us a list of signers
+  const balance = await deployer.getBalance(); //balance of particular signer
   const Marketplace = await hre.ethers.getContractFactory("NFTMarketplace");
   const marketplace = await Marketplace.deploy();
 
-  await marketplace.deployed();
+  await marketplace.deployed(); //event that tells us that marketplace has now been deployed
 
+
+  //saves data of execution. the address of the smart contract and the abi
   const data = {
     address: marketplace.address,
     abi: JSON.parse(marketplace.interface.format('json'))
