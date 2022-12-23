@@ -17,11 +17,60 @@ const [connected, toggleConnect] = useState(false);
 const location = useLocation();
 const [currAddress, updateAddress] = useState('0x');
 
+
+//this function grabs the address when your connected through your wallet
 async function getAddress() {
   const ethers = require("ethers");
   const provider = new ethers.providers.Web3Provider(window.ethereum);
-  const signer = provider.getSigner
+  const signer = provider.getSigner();
+  const addr = await signer.getAddress();
+  updateAddress(addr);
 }
+
+// When you connect wallet 
+function updateButton() {
+  const ethereumButton = document.querySelector('.enableEthereumButton');
+  ethereumButton.textContent = "Connected";
+  ethereumButton.classList.remove("hover:bg-blue-70");
+  ethereumButton.classList.remove("bg-blue-500");
+  ethereumButton.classList.add("hover:bg-green-70");
+  ethereumButton.classList.add("bg-green-500");
+}
+
+async function connectWebsite() {
+
+    const chainId = await window.ethereum.request({ method: 'eth_chainId' }); //checks which netowrk you're on, if you're not on Goerli it will ask you to switch networks.
+
+    if(chainId !== '0x5')
+    {
+      //alert('Incorrect network! Switch your metamask network to Rinkeby');
+      await window.ethereum.request({
+        method: 'wallet_switchEthereumChain',
+        params: [{ chainId: '0x5' }],
+      })
+    }
+    await window.ethereum.request({ method: 'eth_requestAccounts' })
+      .then(() => {
+        updateButton();
+        console.log("here");
+        getAddress();
+        window.location.replace(location.pathname)
+      });
+}
+
+    useEffect(() => {
+      let val = window.ethereum.isConnected();
+      if(val)
+      {
+        console.log("is it because of this?", val); //updates the connect wallet button
+        getAddress();
+        toggleConnect(val);
+        updateButton();
+      }
+      window.ethereum.on('accountsChanged', function(accounts){ //reloads the website
+        window.location.replace(location.pathname)
+      })
+    });
 
     return (
       <div className="">
@@ -65,7 +114,7 @@ async function getAddress() {
               </li>              
               }  
               <li>
-                <button className="enableEthereumButton bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-sm">{connected? "Connected":"Connect Wallet"}</button>
+                <button className="enableEthereumButton bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-sm" onClick={connectWebsite}>{connected? "Connected":"Connect Wallet"}</button>
               </li>
             </ul>
           </li>
