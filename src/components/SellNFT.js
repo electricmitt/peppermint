@@ -30,7 +30,7 @@ export default function SellNFT () {
     async function uploadMetadataToIPFS() {
         const {name, description, price} = formParams;
 
-        if(!name || !description || ~price || !fileURL )
+        if(!name || !description || !price || !fileURL )
             return;
 
         const nftJSON = {
