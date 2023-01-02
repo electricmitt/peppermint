@@ -1,10 +1,11 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.0;
 
-import "hardhat/console.sol";
-import "@openzeppelin/contracts/utils/Counters.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+// imported interfaces to help with the implementation of our smart contract
+import "hardhat/console.sol"; // console.log equivalent in solidity, helps to debug our smart contract
+import "@openzeppelin/contracts/utils/Counters.sol"; // safe and secure implementation of a counter
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol"; // set of functions that helps us with storing the URI. IPFS.io/hash. Helps us retreive and manage this URI.
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol"; // ERC721 open zepplin implementation of the ERC721 Standard for NFTs mints.
 
 contract NFTMarketplace is ERC721URIStorage {
 
@@ -42,7 +43,7 @@ contract NFTMarketplace is ERC721URIStorage {
     mapping(uint256 => ListedToken) private idToListedToken;
 
     constructor() ERC721("NFTMarketplace", "NFTM") {
-        owner = payable(msg.sender);
+        owner = payable(msg.sender); // stores owner of NFT Marketplace, and makes it payable eligible to receive funds.
     }
 
     function updateListPrice(uint256 _listPrice) public payable {
