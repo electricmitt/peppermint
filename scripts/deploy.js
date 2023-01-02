@@ -1,6 +1,6 @@
 const { ethers } = require("hardhat"); // imports ether library from hardhat
 const hre = require("hardhat");
-const fs = require("fs");
+const fs = require("fs"); // a provider (Node or proxy service) and a signer (the address that signs off on those contracts) using the smart contract code and deploys it to the network.
 
 async function main() {
   const [deployer] = await ethers.getSigners(); //gives us a list of signers
